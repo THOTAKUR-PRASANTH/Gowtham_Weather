@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Check</title>
+
+    <style>
+        body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(to bottom, #a8c0ff, #3f2b96);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: white;
+    flex-direction: column;
+}
+
+.container {
+    display: flex;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+}
+
+.weather-side {
+    background: linear-gradient(135deg, #6a11cb, #2575fc);
+    padding: 30px;
+    border-radius: 15px;
+}
+
+.weather-city {
+    font-size: 40px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.weather-temp {
+    font-size: 60px;
+    font-weight: bold;
+}
+
+.weather-desc {
+    font-size: 30px;
+    font-weight: bold;
+    text-transform: capitalize;
+}
+
+.weather-wind {
+    font-size: 25px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.location-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 90%;
+    }
+}
+
+    </style>
+
+
+
+</head>
+<body onload="updateDate()">
+    <div id="login-container">
+        <h2>Get Weather - Login</h2>
+        <input type="text" id="username" placeholder="Enter Username">
+        <input type="password" id="password" placeholder="Enter Password">
+        <button onclick="login()">Login</button>
+    </div>
+    
+    <div id="weather-app" style="display:none;">
+        <div class="container">
+            <div class="weather-side">
+                <div class="date-container">
+                    <h2 class="date-dayname">Loading...</h2>
+                </div>
+                <div class="weather-container">
+                    <h1 class="weather-city">--</h1>  <!-- City, Country & Flag -->
+                    <h1 class="weather-temp">--°C</h1>  <!-- Temperature -->
+                    <h3 class="weather-desc">--</h3>  <!-- Weather Condition -->
+                    <h3 class="weather-wind">Wind: -- km/h</h3>  <!-- Wind Speed -->
+                </div>
+            </div>
+            
+            <div class="location-container">
+                <input type="text" id="location-input" placeholder="Enter Location">
+                <button onclick="updateWeather()">Get Weather</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function login() {
+    let username = document.getElementById('username').value;
+    let password = document.getElementById('password').value;
+
+    if (username === "admin" && password === "1234") { 
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('weather-app').style.display = 'block';
+    } else {
+        alert("Invalid username or password!");
+    }
+}
+
+async function updateWeather() {
+    let location = document.getElementById("location-input").value;
+    let apiKey = "51cbbf3b388c2b7c667ccef0c7c35be9";  // Replace with your actual API key
+    let url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${apiKey}`;
+
+    try {
+        let response = await fetch(url);
+        let data = await response.json();
+        console.log(data);
+
+        if (data.cod !== 200) {  
+            alert(`Error: ${data.message}`);
+            return;
+        }
+
+        // Get country flag
+        let countryCode = data.sys.country.toLowerCase();
+        let countryFlag = `https://flagcdn.com/w40/${countryCode}.png`;
+
+        // Update UI
+        document.querySelector(".weather-city").innerHTML = `${data.name}, ${data.sys.country} <img src="${countryFlag}" width="40" height="30">`;
+        document.querySelector(".weather-temp").textContent = `${data.main.temp}°C`;
+        document.querySelector(".weather-desc").textContent = data.weather[0].description;
+        document.querySelector(".weather-wind").textContent = `Wind: ${data.wind.speed} km/h`;
+    } catch (error) {
+        alert("Network error! Please check your internet connection.");
+    }
+}
+
+function updateDate() {
+    let today = new Date();
+    let options = { weekday: "long", month: "long", day: "numeric" };
+    document.querySelector(".date-dayname").textContent = today.toLocaleDateString("en-US", options);
+}
+
+
+    </script>
+</body>
+</html>
